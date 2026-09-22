@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="id" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>WebMap — Dashboard WebGL Ringan & Cepat</title>
+  <meta name="description" content="WebMap adalah dashboard data visualization ringan berbasis WebGL. Cepat, responsif, dark mode, dan hemat cache.">
+  <meta name="keywords" content="webgl, dashboard, data visualization, three.js, lightweight">
+  <meta name="author" content="arlingkin">
+  <meta name="theme-color" content="#1a1a2e">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="WebMap — Dashboard WebGL Ringan">
+  <meta property="og:description" content="Dashboard data visualization WebGL yang ringan, responsif, dan hemat resource.">
+  <meta property="og:url" content="https://github.com/arlingkin/Webmap">
+  <meta name="twitter:card" content="summary">
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🗺️</text></svg>">
+  <link rel="preconnect" href="https://unpkg.com" crossorigin>
+  <link rel="stylesheet" href="css/style.css">
+  <script type="importmap">
+  {
+    "imports": {
+      "three": "https://unpkg.com/three@0.170.0/build/three.module.js",
+      "three/addons/": "https://unpkg.com/three@0.170.0/examples/jsm/"
+    }
+  }
+  </script>
+</head>
+<body>
+  <a class="skip-link" href="#main">Langsung ke konten</a>
+
+  <header class="nav">
+    <div class="nav-inner container">
+      <a href="#hero" class="brand" aria-label="WebMap home">
+        <span class="brand-mark">🗺️</span>
+        <span class="brand-text">Web<span class="accent">Map</span></span>
+      </a>
+      <nav id="menu" class="menu" aria-label="Navigasi utama">
+        <a href="#hero">Beranda</a>
+        <a href="#ringkas">Ringkasan</a>
+        <a href="#grafik">Grafik</a>
+        <a href="#visual">3D</a>
+        <a href="#kontak">Kontak</a>
+      </nav>
+      <div class="nav-actions">
+        <button id="theme-toggle" class="theme-btn" aria-label="Ganti tema" title="Ganti tema">🌙</button>
+        <button id="menu-toggle" class="hamburger" aria-label="Buka menu" aria-expanded="false">
+          <span></span><span></span><span></span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main id="main">
+    <section id="hero" class="hero">
+      <canvas id="gl-scene" aria-hidden="true"></canvas>
+      <div class="hero-content container">
+        <p class="hero-kicker">Dashboard WebGL · Ringan & Cepat</p>
+        <h1>Data jadi <span class="accent">visual</span>, ringan di segala perangkat.</h1>
+        <p class="hero-sub">WebMap menggabungkan visualisasi 3D WebGL dengan grafik 2D ringan — tanpa bloat, tanpa build tool, hemat cache.</p>
+        <div class="hero-cta">
+          <a href="#grafik" class="btn btn-primary">Lihat Grafik</a>
+          <a href="#visual" class="btn btn-ghost">Eksplorasi 3D</a>
+        </div>
+      </div>
+    </section>
+
+    <section id="ringkas" class="section container">
+      <h2 class="section-title">Ringkasan Kinerja</h2>
+      <p class="section-sub">Indikator utama dipantau langsung, diperbarui dari data statis contoh.</p>
+      <div class="kpis">
+        <article class="kpi card">
+          <span class="kpi-label">Pengunjung</span>
+          <span class="kpi-value" data-count="128400">0</span>
+          <span class="kpi-delta up">▲ 12,4% vs bulan lalu</span>
+        </article>
+        <article class="kpi card">
+          <span class="kpi-label">Transaksi</span>
+          <span class="kpi-value" data-count="38920">0</span>
+          <span class="kpi-delta up">▲ 8,1% vs bulan lalu</span>
+        </article>
+        <article class="kpi card">
+          <span class="kpi-label">Bounce Rate</span>
+          <span class="kpi-value"><span data-count="31">0</span>%</span>
+          <span class="kpi-delta down">▼ 2,3% (baik)</span>
+        </article>
+        <article class="kpi card">
+          <span class="kpi-label">Nilai Load</span>
+          <span class="kpi-value"><span data-count="0.8" data-decimals="1">0</span>s</span>
+          <span class="kpi-delta up">▲ Tercepat di kelas</span>
+        </article>
+      </div>
+    </section>
+
+    <section id="grafik" class="section container">
+      <h2 class="section-title">Grafik Ringan</h2>
+      <p class="section-sub">Chart 2D dibuat dari canvas murni — tanpa library, ukurannya sangat kecil.</p>
+      <div class="charts-grid">
+        <article class="card chart-card">
+          <h3>Tren Pengguna</h3>
+          <canvas id="chart-line" height="260" aria-label="Grafik garis tren pengguna"></canvas>
+        </article>
+        <article class="card chart-card">
+          <h3>Penjualan per Kuartal</h3>
+          <canvas id="chart-bar" height="260" aria-label="Grafik batang penjualan per kuartal"></canvas>
+        </article>
+        <article class="card chart-card">
+          <h3>Pangsa Sumber</h3>
+          <canvas id="chart-donut" height="260" aria-label="Grafik donat pangsa sumber lalu lintas"></canvas>
+        </article>
+      </div>
+    </section>
+
+    <section id="visual" class="section container">
+      <h2 class="section-title">Visualisasi 3D</h2>
+      <p class="section-sub">Bar chart 3D interaktif — seret untuk memutar, gulir untuk zoom. Rendering dijeda otomatis saat tab tidak aktif.</p>
+      <div class="card viewport-card">
+        <canvas id="gl-data" aria-label="Visualisasi bar chart 3D interaktif"></canvas>
+        <p class="hint">🖱️ Seret: putar · Scroll: zoom</p>
+      </div>
+    </section>
+
+    <section id="kontak" class="section container">
+      <h2 class="section-title">Hubungi Kami</h2>
+      <p class="section-sub">Form ini memvalidasi input di sisi klien. No backend — demo siap deploy.</p>
+      <form id="contact-form" class="card form" novalidate>
+        <div class="field">
+          <label for="nama">Nama</label>
+          <input id="nama" name="nama" type="text" placeholder="Nama kamu" required minlength="3">
+          <small class="err"></small>
+        </div>
+        <div class="field">
+          <label for="email">Email</label>
+          <input id="email" name="email" type="email" placeholder="kamu@contoh.id" required>
+          <small class="err"></small>
+        </div>
+        <div class="field">
+          <label for="pesan">Pesan</label>
+          <textarea id="pesan" name="pesan" rows="4" placeholder="Tulis pesanmu di sini..." required minlength="10"></textarea>
+          <small class="err"></small>
+        </div>
+        <button type="submit" class="btn btn-primary">Kirim Pesan</button>
+        <p class="form-msg" role="status" hidden></p>
+      </form>
+    </section>
+  </main>
+
+  <footer class="footer container">
+    <p>© 2026 <strong>WebMap</strong> — dibuat dengan vanilla JS + Three.js. Ringan, cepat, hemat cache.</p>
+  </footer>
+
+  <script src="js/theme.js"></script>
+  <script src="js/charts.js"></script>
+  <script src="js/scene.js" type="module"></script>
+  <script src="js/main.js"></script>
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', function () {
+        navigator.serviceWorker.register('sw.js').catch(function () {});
+      });
+    }
+  </script>
+</body>
+</html>
