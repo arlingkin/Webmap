@@ -1,0 +1,118 @@
+(function () {
+  "use strict";
+
+  var EMBED = [
+    { id: "jakarta", nama: "Jakarta Pusat", lat: -6.2088, lon: 106.8456, tag: "Kantor Pusat", users: 38, trend: 12.4 },
+    { id: "bandung", nama: "Bandung", lat: -6.9175, lon: 107.6191, tag: "R&D", users: 21, trend: 8.1 },
+    { id: "yogyakarta", nama: "Yogyakarta", lat: -7.7971, lon: 110.3708, tag: "Kampus", users: 15, trend: -2.3 },
+    { id: "surabaya", nama: "Surabaya", lat: -7.2575, lon: 112.7521, tag: "Sales", users: 18, trend: 5.9 },
+    { id: "makassar", nama: "Makassar", lat: -5.1477, lon: 119.4327, tag: "Summit", users: 8, trend: 9.7 }
+  ];
+
+  var el = document.getElementById("map");
+  if (!el || typeof window.L === "undefined") return;
+
+  var ATTRIB = '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a>';
+  var PROVIDERS = {
+    dark: { url: "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png", opt: { attribution: ATTRIB, subdomains: "abcd", maxZoom: 19 } },
+    light: { url: "https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png", opt: { attribution: ATTRIB, subdomains: "abcd", maxZoom: 19 } }
+  };
+
+  function isdark() {
+    return document.documentElement.getAttribute("data-theme") !== "light";
+  }
+
+  var map = L.map(el, { scrollWheelZoom: false, worldCopyJump: true }).setView([-2.9, 118.0], 5);
+  var currentLayer = null;
+  var group = L.layerGroup().addTo(map);
+  var currentList = [];
+
+  function tileLayer(dark) {
+    var p = PROVIDERS[dark ? "dark" : "light"];
+    return L.tileLayer(p.url, p.opt);
+  }
+
+  function applyTheme() {
+    if (currentLayer) map.removeLayer(currentLayer);
+    currentLayer = tileLayer(isdark());
+    currentLayer.addTo(map);
+    if (currentList.length) addPoints(currentList);
+  }
+
+  new MutationObserver(applyTheme).observe(document.documentElement, {
+    attributes: true,
+    attributeFilter: ["data-theme"]
+  });
+
+  function accentColor() {
+    return getComputedStyle(document.documentElement).getPropertyValue("--accent").trim() || "#7c5cff";
+  }
+
+  function setSource(txt) {
+    var s = document.getElementById("map-source");
+    if (s) s.textContent = txt;
+  }
+
+  function addPoints(list) {
+    currentList = list;
+    group.clearLayers();
+    var accent = accentColor();
+    list.forEach(function (p) {
+      var mk = L.circleMarker([p.lat, p.lon], {
+        radius: 9,
+        color: accent,
+        weight: 2,
+        fillColor: accent,
+        fillOpacity: 0.35
+      });
+      var arrow = p.trend >= 0 ? "▲" : "▼";
+      mk.bindPopup(
+        "<strong>" + p.nama + "</strong><br>" +
+        p.tag + " · " + p.users + "k pengguna<br>" +
+        arrow + " " + Math.abs(p.trend) + "% vs bulan lalu"
+      );
+      group.addLayer(mk);
+    });
+    if (list.length) map.fitBounds(group.getBounds(), { padding: [30, 30] });
+  }
+
+  applyTheme();
+
+  fetch("/api/locations")
+    .then(function (r) {
+      if (!r.ok) throw new Error("api");
+      return r.json();
+    })
+    .then(function (d) {
+      if (!d.locations || !d.locations.length) throw new Error("kosong");
+      addPoints(d.locations);
+      setSource("Sumber: API Node · " + d.total + " titik aktif");
+    })
+    .catch(function () {
+      addPoints(EMBED);
+      setSource("Sumber: data statis (fallback) — jalankan server Node untuk API");
+    });
+
+  var fitBtn = document.getElementById("map-fit");
+  if (fitBtn) {
+    fitBtn.addEventListener("click", function () {
+      if (currentList.length) map.fitBounds(group.getBounds(), { padding: [30, 30] });
+    });
+  }
+
+  var shown = false;
+  if ("IntersectionObserver" in window) {
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (entry) {
+        if (entry.isIntersecting && !shown) {
+          shown = true;
+          map.invalidateSize();
+        }
+      });
+    });
+    io.observe(el);
+  }
+  window.addEventListener("resize", function () {
+    if (shown) map.invalidateSize();
+  });
+})();

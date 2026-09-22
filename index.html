@@ -16,6 +16,8 @@
   <link rel="manifest" href="manifest.json">
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🗺️</text></svg>">
   <link rel="preconnect" href="https://unpkg.com" crossorigin>
+  <link rel="preconnect" href="https://a.basemaps.cartocdn.com" crossorigin>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin>
   <link rel="stylesheet" href="css/style.css">
   <script type="importmap">
   {
@@ -39,6 +41,7 @@
         <a href="#hero">Beranda</a>
         <a href="#ringkas">Ringkasan</a>
         <a href="#grafik">Grafik</a>
+        <a href="#peta">Peta</a>
         <a href="#visual">3D</a>
         <a href="#kontak">Kontak</a>
       </nav>
@@ -71,30 +74,30 @@
       <div class="kpis">
         <article class="kpi card">
           <span class="kpi-label">Pengunjung</span>
-          <span class="kpi-value" data-count="128400">0</span>
+          <span class="kpi-value" data-key="pengunjung" data-count="128400">0</span>
           <span class="kpi-delta up">▲ 12,4% vs bulan lalu</span>
         </article>
         <article class="kpi card">
           <span class="kpi-label">Transaksi</span>
-          <span class="kpi-value" data-count="38920">0</span>
+          <span class="kpi-value" data-key="transaksi" data-count="38920">0</span>
           <span class="kpi-delta up">▲ 8,1% vs bulan lalu</span>
         </article>
         <article class="kpi card">
           <span class="kpi-label">Bounce Rate</span>
-          <span class="kpi-value"><span data-count="31">0</span>%</span>
+          <span class="kpi-value" data-key="bounce"><span data-count="31">0</span>%</span>
           <span class="kpi-delta down">▼ 2,3% (baik)</span>
         </article>
         <article class="kpi card">
           <span class="kpi-label">Nilai Load</span>
-          <span class="kpi-value"><span data-count="0.8" data-decimals="1">0</span>s</span>
+          <span class="kpi-value" data-key="load"><span data-count="0.8" data-decimals="1">0</span>s</span>
           <span class="kpi-delta up">▲ Tercepat di kelas</span>
         </article>
       </div>
     </section>
 
     <section id="grafik" class="section container">
-      <h2 class="section-title">Grafik Ringan</h2>
-      <p class="section-sub">Chart 2D dibuat dari canvas murni — tanpa library, ukurannya sangat kecil.</p>
+      <h2 class="section-title">Grafik Ringan <span id="live-state" class="live-state" data-state="boot">tunggu…</span></h2>
+      <p class="section-sub">Chart 2D dibuat dari canvas murni — tanpa library. Grafik garis menyala real-time lewat SSE <code>/api/stream</code> dari micro-server Node, dengan simulasi lokal sebagai cadangan.</p>
       <div class="charts-grid">
         <article class="card chart-card">
           <h3>Tren Pengguna</h3>
@@ -108,6 +111,18 @@
           <h3>Pangsa Sumber</h3>
           <canvas id="chart-donut" height="260" aria-label="Grafik donat pangsa sumber lalu lintas"></canvas>
         </article>
+      </div>
+    </section>
+
+    <section id="peta" class="section container">
+      <h2 class="section-title">Peta Lokasi</h2>
+      <p class="section-sub">Distribusi aktivitas di seluruh titik. Data ditarik dari API Node (<code>/api/locations</code>) — jika server Node tidak ada, peta otomatis pakai data statis.</p>
+      <div class="card map-card">
+        <div id="map" role="application" aria-label="Peta lokasi aktivitas WebMap"></div>
+        <div class="map-info">
+          <span id="map-source" class="map-source">Memuat titik…</span>
+          <button id="map-fit" type="button" class="map-fit">🖼️ Persempit tampilan</button>
+        </div>
       </div>
     </section>
 
@@ -146,11 +161,14 @@
   </main>
 
   <footer class="footer container">
-    <p>© 2026 <strong>WebMap</strong> — dibuat dengan vanilla JS + Three.js. Ringan, cepat, hemat cache.</p>
+    <p>© 2026 <strong>WebMap</strong> — vanilla JS + Three.js + Leaflet, didukung micro-server Node.js. Ringan, cepat, hemat cache.</p>
   </footer>
 
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin></script>
   <script src="js/theme.js"></script>
   <script src="js/charts.js"></script>
+  <script src="js/map.js"></script>
+  <script src="js/live.js"></script>
   <script src="js/scene.js" type="module"></script>
   <script src="js/main.js"></script>
   <script>

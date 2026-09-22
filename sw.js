@@ -1,4 +1,4 @@
-var CACHE = "webmap-v1";
+var CACHE = "webmap-v2";
 var ASSETS = [
   "./",
   "index.html",
@@ -6,14 +6,26 @@ var ASSETS = [
   "js/theme.js",
   "js/main.js",
   "js/charts.js",
+  "js/map.js",
+  "js/live.js",
   "js/scene.js",
   "manifest.json"
+];
+var CDN = [
+  "https://unpkg.com/leaflet@1.9.4/dist/leaflet.js",
+  "https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
 ];
 
 self.addEventListener("install", function (event) {
   event.waitUntil(
     caches.open(CACHE).then(function (cache) {
-      return cache.addAll(ASSETS);
+      return cache.addAll(ASSETS).then(function () {
+        return Promise.all(CDN.map(function (url) {
+          return fetch(url).then(function (res) {
+            if (res && res.ok) return cache.put(url, res);
+          }).catch(function () {});
+        }));
+      });
     }).then(function () {
       return self.skipWaiting();
     })
@@ -36,7 +48,8 @@ self.addEventListener("fetch", function (event) {
   var req = event.request;
   if (req.method !== "GET") return;
   var url = new URL(req.url);
-  if (url.origin !== self.location.origin) return;
+  if (url.origin !== self.location.origin && url.hostname !== "unpkg.com") return;
+  if (url.pathname.indexOf("/api/") === 0) return;
 
   event.respondWith(
     caches.match(req).then(function (cached) {
@@ -45,6 +58,12 @@ self.addEventListener("fetch", function (event) {
           var copy = res.clone();
           caches.open(CACHE).then(function (cache) {
             cache.put(req, copy);
+          });
+        } else if (res && res.ok && res.type === "cors" &&
+                   url.hostname === "unpkg.com" && CDN.indexOf(req.url) !== -1) {
+          var cdnCopy = res.clone();
+          caches.open(CACHE).then(function (cache) {
+            cache.put(req, cdnCopy);
           });
         }
         return res;

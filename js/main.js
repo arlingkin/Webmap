@@ -126,4 +126,20 @@
       }
     });
   }
+
+  fetch("/api/kpi")
+    .then(function (r) {
+      if (!r.ok) throw new Error("api");
+      return r.json();
+    })
+    .then(function (d) {
+      var kpi = (d && d.kpi) || {};
+      document.querySelectorAll(".kpi-value[data-key]").forEach(function (el) {
+        if (kpi[el.dataset.key] === undefined || kpi[el.dataset.key] === null) return;
+        var inner = el.querySelector("[data-count]") || el;
+        inner.dataset.count = String(kpi[el.dataset.key]);
+        animateValue(inner);
+      });
+    })
+    .catch(function () {});
 })();

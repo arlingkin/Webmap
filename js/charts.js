@@ -32,6 +32,9 @@
     { label: "Sosial", value: 10, color: "#f472b6" }
   ];
 
+  var LIVE_BUFFER = [];
+  var LIVE_MAX = 40;
+
   function setup(canvas) {
     if (!canvas) return null;
     var rect = canvas.getBoundingClientRect();
@@ -60,9 +63,10 @@
     ctx.closePath();
   }
 
-  function drawLine() {
+  function drawLine(data) {
+    var series = data || LINE_DATA;
     var s = setup(lineCanvas);
-    if (!s) return;
+    if (!s || !series.length) return;
     var ctx = s.ctx, w = s.w, h = s.h;
     ctx.clearRect(0, 0, w, h);
     var accent = themeColor("--accent", "#7c5cff");
@@ -73,8 +77,11 @@
     var pad = { l: 34, r: 12, t: 14, b: 26 };
     var innerW = w - pad.l - pad.r;
     var innerH = h - pad.t - pad.b;
-    var max = Math.max.apply(null, LINE_DATA.map(function (d) { return d.value; })) * 1.15;
-    var n = LINE_DATA.length;
+    var max = Math.max.apply(null, series.map(function (d) { return d.value; })) * 1.15;
+    var min = Math.min.apply(null, series.map(function (d) { return d.value; }));
+    if (!max) return;
+    if (min < 0 || max - min < 30) max = min + 30;
+    var n = series.length;
 
     ctx.strokeStyle = grid;
     ctx.lineWidth = 1;
@@ -86,7 +93,7 @@
       ctx.stroke();
     }
 
-    var pts = LINE_DATA.map(function (d, i) {
+    var pts = series.map(function (d, i) {
       var x = pad.l + (innerW * i) / (n - 1);
       var y = pad.t + innerH - (d.value / max) * innerH;
       return { x: x, y: y };
@@ -132,11 +139,13 @@
     ctx.fillStyle = muted;
     ctx.font = "11px system-ui, sans-serif";
     ctx.textAlign = "center";
-    ctx.fillText(LINE_DATA[0].label, pad.l, h - 8);
-    ctx.fillText(LINE_DATA[n - 1].label, w - pad.r, h - 8);
-    pts.forEach(function (p, i) {
-      if (i > 0 && i < n - 1) ctx.fillText(LINE_DATA[i].label, p.x, h - 8);
-    });
+    var step = Math.max(1, Math.ceil((n - 1) / 6));
+    for (var li = 0; li < n; li += step) {
+      ctx.fillText(series[li].label, pts[li].x, h - 8);
+    }
+    if ((n - 1) % step !== 0) {
+      ctx.fillText(series[n - 1].label, pts[n - 1].x, h - 8);
+    }
   }
 
   function drawBar() {
@@ -243,6 +252,17 @@
     drawBar();
     drawDonut();
   }
+
+  window.WebMapCharts = {
+    pushLive: function (value) {
+      if (typeof value !== "number") return;
+      LIVE_BUFFER.push({ label: "", value: value });
+      if (LIVE_BUFFER.length > LIVE_MAX) LIVE_BUFFER.shift();
+      LIVE_BUFFER[LIVE_BUFFER.length - 1].label =
+        new Date().toLocaleTimeString("id-ID", { hour12: false });
+      drawLine(LIVE_BUFFER);
+    }
+  };
 
   var resizeTimer;
   window.addEventListener("resize", function () {
