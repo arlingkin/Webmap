@@ -1,4 +1,4 @@
-var CACHE = "webmap-v2";
+var CACHE = "webmap-v3";
 var ASSETS = [
   "./",
   "index.html",
@@ -6,6 +6,7 @@ var ASSETS = [
   "js/theme.js",
   "js/main.js",
   "js/charts.js",
+  "js/monitor.js",
   "js/map.js",
   "js/live.js",
   "js/scene.js",

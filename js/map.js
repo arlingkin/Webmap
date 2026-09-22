@@ -73,8 +73,32 @@
       );
       group.addLayer(mk);
     });
+    var count = document.getElementById("map-count");
+    if (count) count.textContent = String(list.length);
     if (list.length) map.fitBounds(group.getBounds(), { padding: [30, 30] });
   }
+
+  var pulseTimer = null;
+  function startPulse() {
+    if (pulseTimer) return;
+    var t0 = performance.now();
+    pulseTimer = window.setInterval(function () {
+      var t = (performance.now() - t0) / 480;
+      group.getLayers().forEach(function (mk, i) {
+        mk.setRadius(8 + Math.round(Math.abs(Math.sin(t + i * 1.7)) * 4) + 1);
+      });
+    }, 240);
+  }
+  function stopPulse() {
+    if (pulseTimer) {
+      window.clearInterval(pulseTimer);
+      pulseTimer = null;
+    }
+  }
+  document.addEventListener("visibilitychange", function () {
+    if (document.hidden) stopPulse();
+    else if (shown) startPulse();
+  });
 
   applyTheme();
 
@@ -107,10 +131,14 @@
         if (entry.isIntersecting && !shown) {
           shown = true;
           map.invalidateSize();
+          startPulse();
         }
       });
     });
     io.observe(el);
+  } else {
+    shown = true;
+    startPulse();
   }
   window.addEventListener("resize", function () {
     if (shown) map.invalidateSize();

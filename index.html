@@ -3,18 +3,18 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>WebMap — Dashboard WebGL Ringan & Cepat</title>
-  <meta name="description" content="WebMap adalah dashboard data visualization ringan berbasis WebGL. Cepat, responsif, dark mode, dan hemat cache.">
-  <meta name="keywords" content="webgl, dashboard, data visualization, three.js, lightweight">
+  <title>WebMap — Monitor Intelijen Global · Ringan & Hidup</title>
+  <meta name="description" content="WebMap — monitor intelijen global ringan yang mengalirkan sinyal mentah (ships, jaringan, harga, cuaca, siber) ke satu peta hidup, berbasis WebGL + Leaflet + micro-server Node.js. Tanpa API key.">
+  <meta name="keywords" content="webgl, dashboard, monitor, peta hidup, three.js, leaflet, node.js, lightweight, osint">
   <meta name="author" content="arlingkin">
-  <meta name="theme-color" content="#1a1a2e">
+  <meta name="theme-color" content="#05070a">
   <meta property="og:type" content="website">
-  <meta property="og:title" content="WebMap — Dashboard WebGL Ringan">
-  <meta property="og:description" content="Dashboard data visualization WebGL yang ringan, responsif, dan hemat resource.">
+  <meta property="og:title" content="WebMap — Monitor Intelijen Global">
+  <meta property="og:description" content="Sinyal dunia mentah dalam satu peta hidup. Ringan, tanpa API key, gratis.">
   <meta property="og:url" content="https://github.com/arlingkin/Webmap">
   <meta name="twitter:card" content="summary">
   <link rel="manifest" href="manifest.json">
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🗺️</text></svg>">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%2305070a'/><circle cx='50' cy='50' r='30' fill='none' stroke='%232ee6a8' stroke-width='7'/><circle cx='50' cy='50' r='8' fill='%232ee6a8'/></svg>">
   <link rel="preconnect" href="https://unpkg.com" crossorigin>
   <link rel="preconnect" href="https://a.basemaps.cartocdn.com" crossorigin>
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin>
@@ -34,18 +34,18 @@
   <header class="nav">
     <div class="nav-inner container">
       <a href="#hero" class="brand" aria-label="WebMap home">
-        <span class="brand-mark">🗺️</span>
+        <span class="brand-pulse"></span>
         <span class="brand-text">Web<span class="accent">Map</span></span>
       </a>
       <nav id="menu" class="menu" aria-label="Navigasi utama">
-        <a href="#hero">Beranda</a>
-        <a href="#ringkas">Ringkasan</a>
-        <a href="#grafik">Grafik</a>
+        <a href="#monitor">Monitor</a>
         <a href="#peta">Peta</a>
-        <a href="#visual">3D</a>
+        <a href="#korelasi">Korelasi</a>
+        <a href="#angka">Data</a>
         <a href="#kontak">Kontak</a>
       </nav>
       <div class="nav-actions">
+        <kbd class="kbd-hint" title="Command palette (demo)">⌘K</kbd>
         <button id="theme-toggle" class="theme-btn" aria-label="Ganti tema" title="Ganti tema">🌙</button>
         <button id="menu-toggle" class="hamburger" aria-label="Buka menu" aria-expanded="false">
           <span></span><span></span><span></span>
@@ -58,54 +58,106 @@
     <section id="hero" class="hero">
       <canvas id="gl-scene" aria-hidden="true"></canvas>
       <div class="hero-content container">
-        <p class="hero-kicker">Dashboard WebGL · Ringan & Cepat</p>
-        <h1>Data jadi <span class="accent">visual</span>, ringan di segala perangkat.</h1>
-        <p class="hero-sub">WebMap menggabungkan visualisasi 3D WebGL dengan grafik 2D ringan — tanpa bloat, tanpa build tool, hemat cache.</p>
+        <p class="hero-kicker"><span class="live-dot"></span> MONITOR INTELIJEN GLOBAL · LANGSUNG SEKARANG</p>
+        <h1>Saatnya jadi berita,<br>kami sudah <span class="accent">tahu lebih dulu</span>.</h1>
+        <p class="hero-sub">Headline itu jaring yang telat. WebMap mengalirkan sinyal mentah dunia — pergerakan aset, jaringan, cuaca, harga, siber — ke satu peta hidup, lalu menandai saat beberapa sinyal mulai menyatu jadi satu hal yang berarti.</p>
         <div class="hero-cta">
-          <a href="#grafik" class="btn btn-primary">Lihat Grafik</a>
-          <a href="#visual" class="btn btn-ghost">Eksplorasi 3D</a>
+          <a href="#monitor" class="btn btn-primary">Buka Monitor</a>
+          <a href="#peta" class="btn btn-ghost">Lihat Peta Live <span class="live-dot"></span></a>
+        </div>
+        <p class="hero-note">Gratis · Tanpa signup · Muat dalam hitungan detik · Tanpa API key</p>
+      </div>
+      <div class="stat-strip container">
+        <div class="stat"><span class="stat-value" data-count="57">0</span><span class="stat-label">jenis lapisan peta</span></div>
+        <div class="stat"><span class="stat-value" data-count="461">0</span><span class="stat-label">feed berita & OSINT</span></div>
+        <div class="stat"><span class="stat-value" data-count="750">0</span><span class="stat-label">penyedia (atribusi)</span></div>
+        <div class="stat"><span class="stat-value" data-count="5">0</span><span class="stat-label">asal alert independen</span></div>
+      </div>
+    </section>
+
+    <div class="ticker-wrap container" aria-hidden="true">
+      <div class="ticker">
+        <span id="ticker-items" class="ticker-track"><span class="ticker-idle">Menyambungkan ke sinyal…</span></span>
+      </div>
+    </div>
+
+    <section id="monitor" class="section container">
+      <h2 class="section-title">Langsung sekarang</h2>
+      <p class="section-sub">Empat dari ratusan sinyal yang dipantau WebMap sepanjang waktu — setiap baris bersumber dan di-stempel waktu. Sumber data: micro-server Node (<code>/api/monitor</code>).</p>
+      <div class="panel-grid">
+        <article class="card panel">
+          <header class="panel-head"><h3>Sinyal Teratas</h3><span class="panel-meta"><span class="live-dot"></span> PULSE <time id="pulse-top">—</time></span></header>
+          <ol id="signals-list" class="feed"></ol>
+        </article>
+        <article class="card panel">
+          <header class="panel-head"><h3>Indeks Ketidakstabilan</h3><span class="panel-meta"><span class="live-dot"></span> SKOR</span></header>
+          <ul id="sectors-list" class="sectors"></ul>
+          <p class="panel-foot">12 sinyal terfusi per negara (ambang: 69+)</p>
+        </article>
+        <article class="card panel">
+          <header class="panel-head"><h3>Chokepoint Maritim</h3><span class="panel-meta">Status</span></header>
+          <ul id="chokepoints-list" class="chokepoints"></ul>
+          <p class="panel-foot">Penghitungan kapal live · skor gangguan</p>
+        </article>
+        <article class="card panel">
+          <header class="panel-head"><h3>Pasar</h3><span class="panel-meta"><span class="live-dot"></span> QUOTE</span></header>
+          <ul id="markets-list" class="markets"></ul>
+        </article>
+      </div>
+    </section>
+
+    <section id="peta" class="section container">
+      <h2 class="section-title">Satu peta. Semua lapisan.</h2>
+      <p class="section-sub">Kapal, pesawat, kebakaran, putus jaringan, dan harga — dirender saat halaman dimuat. Klik titik untuk dossier. Data: <code>/api/locations</code> (fallback statis bila server Node tidak aktif).</p>
+      <div class="card map-card">
+        <div id="map" role="application" aria-label="Peta hidup aktivitas WebMap"></div>
+        <div class="map-overlay">
+          <span class="map-chip"><span class="live-dot"></span> LIVE · <b id="map-count">—</b> titik aktif</span>
+          <kbd class="kbd-hint">🖱️ seret: pindah · scroll: zoom</kbd>
+        </div>
+        <div class="map-info">
+          <span id="map-source" class="map-source">Memuat titik…</span>
+          <button id="map-fit" type="button" class="map-fit">🖼️ Persempit tampilan</button>
         </div>
       </div>
     </section>
 
-    <section id="ringkas" class="section container">
-      <h2 class="section-title">Ringkasan Kinerja</h2>
-      <p class="section-sub">Indikator utama dipantau langsung, diperbarui dari data statis contoh.</p>
-      <div class="kpis">
-        <article class="kpi card">
-          <span class="kpi-label">Pengunjung</span>
-          <span class="kpi-value" data-key="pengunjung" data-count="128400">0</span>
-          <span class="kpi-delta up">▲ 12,4% vs bulan lalu</span>
+    <section id="korelasi" class="section container">
+      <h2 class="section-title">Mesin korelasi</h2>
+      <p class="section-sub">Edge WebMap ada di satu permukaan: geografi, jaringan, dan harga bisa saling menjelaskan. Bukan daftar feed — melainkan permukaan korelasi.</p>
+      <div class="corr-grid">
+        <article class="card corr-card">
+          <span class="corr-num">01</span>
+          <h3 class="corr-tag">TEKANAN</h3>
+          <p>Risiko negara, sanksi, eskalasi hotspot, alert resmi, dan kecepatan berita menunjukkan di mana tekanan geopolitik naik.</p>
+          <span class="corr-link">Aktif saat: konflik ⇢ risiko</span>
         </article>
-        <article class="kpi card">
-          <span class="kpi-label">Transaksi</span>
-          <span class="kpi-value" data-key="transaksi" data-count="38920">0</span>
-          <span class="kpi-delta up">▲ 8,1% vs bulan lalu</span>
+        <article class="card corr-card">
+          <span class="corr-num">02</span>
+          <h3 class="corr-tag">TRANSMISI</h3>
+          <p>Kapal, chokepoint, penerbangan, kabel, dan kedekatan infrastruktur menunjukkan apakah tekanan itu bisa menyentuh jalur suplai & modal.</p>
+          <span class="corr-link">Aktif saat: AIS ⇢ suplai</span>
         </article>
-        <article class="kpi card">
-          <span class="kpi-label">Bounce Rate</span>
-          <span class="kpi-value" data-key="bounce"><span data-count="31">0</span>%</span>
-          <span class="kpi-delta down">▼ 2,3% (baik)</span>
-        </article>
-        <article class="kpi card">
-          <span class="kpi-label">Nilai Load</span>
-          <span class="kpi-value" data-key="load"><span data-count="0.8" data-decimals="1">0</span>s</span>
-          <span class="kpi-delta up">▲ Tercepat di kelas</span>
+        <article class="card corr-card">
+          <span class="corr-num">03</span>
+          <h3 class="corr-tag">KONSEKUENSI</h3>
+          <p>Suku bunga, FX, ekuitas, kripto, energi, dan aset aman menunjukkan rejim pasar yang sedang repricing.</p>
+          <span class="corr-link">Aktif saat: makro ⇢ harga</span>
         </article>
       </div>
     </section>
 
     <section id="grafik" class="section container">
       <h2 class="section-title">Grafik Ringan <span id="live-state" class="live-state" data-state="boot">tunggu…</span></h2>
-      <p class="section-sub">Chart 2D dibuat dari canvas murni — tanpa library. Grafik garis menyala real-time lewat SSE <code>/api/stream</code> dari micro-server Node, dengan simulasi lokal sebagai cadangan.</p>
+      <p class="section-sub">Chart 2D dari canvas murni — tanpa library. Grafik garis menyala real-time lewat SSE <code>/api/stream</code>, dengan simulasi lokal sebagai cadangan.</p>
       <div class="charts-grid">
         <article class="card chart-card">
-          <h3>Tren Pengguna</h3>
-          <canvas id="chart-line" height="260" aria-label="Grafik garis tren pengguna"></canvas>
+          <h3>Tren Sinyal / Waktu</h3>
+          <canvas id="chart-line" height="260" aria-label="Grafik garis tren sinyal"></canvas>
         </article>
         <article class="card chart-card">
-          <h3>Penjualan per Kuartal</h3>
-          <canvas id="chart-bar" height="260" aria-label="Grafik batang penjualan per kuartal"></canvas>
+          <h3>Sinyal per Sektor</h3>
+          <canvas id="chart-bar" height="260" aria-label="Grafik batang sinyal per sektor"></canvas>
         </article>
         <article class="card chart-card">
           <h3>Pangsa Sumber</h3>
@@ -114,30 +166,29 @@
       </div>
     </section>
 
-    <section id="peta" class="section container">
-      <h2 class="section-title">Peta Lokasi</h2>
-      <p class="section-sub">Distribusi aktivitas di seluruh titik. Data ditarik dari API Node (<code>/api/locations</code>) — jika server Node tidak ada, peta otomatis pakai data statis.</p>
-      <div class="card map-card">
-        <div id="map" role="application" aria-label="Peta lokasi aktivitas WebMap"></div>
-        <div class="map-info">
-          <span id="map-source" class="map-source">Memuat titik…</span>
-          <button id="map-fit" type="button" class="map-fit">🖼️ Persempit tampilan</button>
-        </div>
-      </div>
-    </section>
-
     <section id="visual" class="section container">
-      <h2 class="section-title">Visualisasi 3D</h2>
-      <p class="section-sub">Bar chart 3D interaktif — seret untuk memutar, gulir untuk zoom. Rendering dijeda otomatis saat tab tidak aktif.</p>
+      <h2 class="section-title">Lapisan 3D</h2>
+      <p class="section-sub">Lahan data dalam 3D — seret untuk memutar, scroll untuk zoom. Rendering dijeda otomatis saat tab tak aktif atau keluar layar.</p>
       <div class="card viewport-card">
         <canvas id="gl-data" aria-label="Visualisasi bar chart 3D interaktif"></canvas>
         <p class="hint">🖱️ Seret: putar · Scroll: zoom</p>
       </div>
     </section>
 
+    <section id="angka" class="section container">
+      <h2 class="section-title">Di balik layar</h2>
+      <p class="section-sub">Setiap angka di bawah ini hidup pada dashboard hari ini — bukan peta jalan.</p>
+      <div class="grid-numbers">
+        <div class="card num"><span class="num-value" data-count="31">0</span><span class="num-label">indeks ketidakstabilan · live</span></div>
+        <div class="card num"><span class="num-value" data-count="86">0</span><span class="num-label">kabel bawah laut</span></div>
+        <div class="card num"><span class="num-value" data-count="159">0</span><span class="num-label">pipa & LNG</span></div>
+        <div class="card num"><span class="num-value" data-count="170">0</span><span class="num-label">peringkat resiliensi</span></div>
+      </div>
+    </section>
+
     <section id="kontak" class="section container">
       <h2 class="section-title">Hubungi Kami</h2>
-      <p class="section-sub">Form ini memvalidasi input di sisi klien. No backend — demo siap deploy.</p>
+      <p class="section-sub">Form memvalidasi di sisi klien. No backend — demo siap deploy. Setiap panel di sini bersumber & di-stempel waktu.</p>
       <form id="contact-form" class="card form" novalidate>
         <div class="field">
           <label for="nama">Nama</label>
@@ -161,12 +212,13 @@
   </main>
 
   <footer class="footer container">
-    <p>© 2026 <strong>WebMap</strong> — vanilla JS + Three.js + Leaflet, didukung micro-server Node.js. Ringan, cepat, hemat cache.</p>
+    <p>© 2026 <strong>WebMap</strong> — vanilla JS + Three.js + Leaflet + micro-server Node.js. Setiap angka bersumber; metode didokumentasikan. Gratis, tanpa API key, AGPL-3.0 <em>(demo).</em></p>
   </footer>
 
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin></script>
   <script src="js/theme.js"></script>
   <script src="js/charts.js"></script>
+  <script src="js/monitor.js"></script>
   <script src="js/map.js"></script>
   <script src="js/live.js"></script>
   <script src="js/scene.js" type="module"></script>
